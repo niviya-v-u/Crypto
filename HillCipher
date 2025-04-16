@@ -1,0 +1,191 @@
+import java.util.Scanner;
+
+public class HillCipher {
+
+    public static int[][] keyMatrix;
+    public static int[][] inverseKeyMatrix;
+    public static int[] messageVector;
+    public static int[] cipherMatrix;
+    public static int size;
+
+    public static void generateKeyMatrix(int[][] key) {
+        keyMatrix = key;
+    }
+
+    public static int modInverse(int a, int m) {
+        for (int x = 1; x < m; x++) {
+            if ((a * x) % m == 1) return x;
+        }
+        return 1;
+    }
+
+    public static void calculateInverseKeyMatrix(int[][] key) {
+        int determinant = 0;
+        if (size == 2) {
+            determinant = key[0][0] * key[1][1] - key[0][1] * key[1][0];
+        } else {
+            for (int i = 0; i < size; i++) {
+                determinant += key[0][i] * (key[1][(i + 1) % size] * key[2][(i + 2) % size] - key[1][(i + 2) % size] * key[2][(i + 1) % size]);
+            }
+        }
+        determinant %= 26;
+        if (determinant < 0) determinant += 26;
+
+        int inverseDet = modInverse(determinant, 26);
+
+        inverseKeyMatrix = new int[size][size];
+        if (size == 2) {
+            inverseKeyMatrix[0][0] = key[1][1];
+            inverseKeyMatrix[0][1] = -key[0][1];
+            inverseKeyMatrix[1][0] = -key[1][0];
+            inverseKeyMatrix[1][1] = key[0][0];
+
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    inverseKeyMatrix[i][j] = (inverseKeyMatrix[i][j] * inverseDet) % 26;
+                    if (inverseKeyMatrix[i][j] < 0) inverseKeyMatrix[i][j] += 26;
+                }
+            }
+        } else {
+            int[][] adjoint = new int[size][size];
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    adjoint[j][i] = (key[(i + 1) % size][(j + 1) % size] * key[(i + 2) % size][(j + 2) % size]
+                            - key[(i + 1) % size][(j + 2) % size] * key[(i + 2) % size][(j + 1) % size]) % 26;
+                    if (adjoint[j][i] < 0) adjoint[j][i] += 26;
+                }
+            }
+
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    inverseKeyMatrix[i][j] = (adjoint[i][j] * inverseDet) % 26;
+                    if (inverseKeyMatrix[i][j] < 0) inverseKeyMatrix[i][j] += 26;
+                }
+            }
+        }
+    }
+
+    public static void encryptMessage(String message) {
+        messageVector = new int[size];
+        cipherMatrix = new int[size];
+        for (int i = 0; i < size; i++) {
+            messageVector[i] = message.charAt(i) % 65;
+        }
+        for (int i = 0; i < size; i++) {
+            cipherMatrix[i] = 0;
+            for (int j = 0; j < size; j++) {
+                cipherMatrix[i] += keyMatrix[i][j] * messageVector[j];
+            }
+            cipherMatrix[i] %= 26;
+        }
+    }
+
+    public static void decryptMessage() {
+        int[] decryptedVector = new int[size];
+        for (int i = 0; i < size; i++) {
+            decryptedVector[i] = 0;
+            for (int j = 0; j < size; j++) {
+                decryptedVector[i] += inverseKeyMatrix[i][j] * cipherMatrix[j];
+            }
+            decryptedVector[i] %= 26;
+        }
+
+        System.out.print("Decrypted Text: ");
+        for (int i = 0; i < size; i++) {
+            System.out.print((char) (decryptedVector[i] + 65));
+        }
+        System.out.println();
+    }
+
+    public static void bigramHillCipher() {
+        size = 2;
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter the 2x2 key matrix for bigram:");
+        int[][] key = new int[2][2];
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                key[i][j] = scanner.nextInt();
+            }
+        }
+
+        generateKeyMatrix(key);
+        calculateInverseKeyMatrix(key);
+
+        System.out.print("Enter the plaintext (length must be even): ");
+        String message = scanner.next().toUpperCase();
+
+        if (message.length() % 2 != 0) {
+            System.out.println("Invalid plaintext length. Must be even.");
+            return;
+        }
+
+        StringBuilder ciphertext = new StringBuilder();
+        StringBuilder decryptedText = new StringBuilder();
+
+        for (int i = 0; i < message.length(); i += size) {
+            String chunk = message.substring(i, i + size);
+
+            encryptMessage(chunk);
+            for (int j = 0; j < size; j++) {
+                ciphertext.append((char) (cipherMatrix[j] + 65));
+            }
+
+            decryptMessage();
+            for (int j = 0; j < size; j++) {
+                decryptedText.append((char) (messageVector[j] + 65));
+            }
+        }
+
+        System.out.println("Ciphertext: " + ciphertext.toString());
+        System.out.println("Decrypted Text: " + decryptedText.toString());
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Choose the option:");
+        System.out.println("1. General Hill Cipher (n x n matrix)");
+        System.out.println("2. Hill Cipher with Bigram (2x2 matrix)");
+        int choice = scanner.nextInt();
+
+        if (choice == 1) {
+            System.out.print("Enter the size of the key matrix (n for nxn): ");
+            size = scanner.nextInt();
+
+            System.out.println("Enter the key matrix (values between 0-25): ");
+            int[][] key = new int[size][size];
+            for (int i = 0; i < size; i++) {
+                for (int j = 0; j < size; j++) {
+                    key[i][j] = scanner.nextInt();
+                }
+            }
+
+            generateKeyMatrix(key);
+            calculateInverseKeyMatrix(key);
+
+            System.out.print("Enter the plaintext (length equal to key matrix size): ");
+            String message = scanner.next().toUpperCase();
+
+            if (message.length() != size) {
+                System.out.println("Invalid message length. Must match key matrix size.");
+                return;
+            }
+
+            encryptMessage(message);
+
+            System.out.print("Ciphertext: ");
+            for (int i = 0; i < size; i++) {
+                System.out.print((char) (cipherMatrix[i] + 65));
+            }
+            System.out.println();
+
+            decryptMessage();
+
+        } else if (choice == 2) {
+            bigramHillCipher();
+        } else {
+            System.out.println("Invalid choice.");
+        }
+    }
+}

@@ -1,0 +1,99 @@
+import java.util.Scanner;
+
+public class RouteCipher {
+
+    // Method to perform X+1 Cipher
+    public static String applyXPlusOneCipher(String text) {
+        StringBuilder cipherText = new StringBuilder();
+        
+        for (char ch : text.toCharArray()) {
+            if (Character.isLetter(ch)) {
+                char newChar = (char) (ch + 1);
+                if (ch == 'Z') {
+                    newChar = 'A';
+                } else if (ch == 'z') {
+                    newChar = 'a';
+                }
+                cipherText.append(newChar);
+            } else {
+                cipherText.append(ch);  // Leave non-letters unchanged
+            }
+        }
+        return cipherText.toString();
+    }
+
+    // Method to encrypt using Route Cipher in Spiral Order (Clockwise Inward)
+    public static String encryptRouteCipher(String message, int rows, int cols) {
+        // Fill grid with message (use 'X' for empty spaces if needed)
+        char[][] grid = new char[rows][cols];
+        int index = 0;
+
+        // Fill the grid with the message
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (index < message.length()) {
+                    grid[i][j] = message.charAt(index++);
+                } else {
+                    grid[i][j] = 'X'; // Padding with 'X' for empty cells
+                }
+            }
+        }
+
+        // Now, read in a spiral order starting from the top right
+        StringBuilder spiralOrder = new StringBuilder();
+        int top = 0, bottom = rows - 1, left = 0, right = cols - 1;
+
+        while (top <= bottom && left <= right) {
+            // Traverse from top-right to top-left
+            for (int i = right; i >= left; i--) {
+                spiralOrder.append(grid[top][i]);
+            }
+            top++;
+
+            // Traverse downwards from top-left to bottom-left
+            for (int i = top; i <= bottom; i++) {
+                spiralOrder.append(grid[i][left]);
+            }
+            left++;
+
+            // Traverse from bottom-left to bottom-right (if applicable)
+            if (top <= bottom) {
+                for (int i = left; i <= right; i++) {
+                    spiralOrder.append(grid[bottom][i]);
+                }
+                bottom--;
+            }
+
+            // Traverse upwards from bottom-right to top-right (if applicable)
+            if (left <= right) {
+                for (int i = bottom; i >= top; i--) {
+                    spiralOrder.append(grid[i][right]);
+                }
+                right--;
+            }
+        }
+
+        return spiralOrder.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter the message to encrypt:");
+        String message = scanner.nextLine();
+
+        System.out.println("Enter number of rows for grid:");
+        int rows = scanner.nextInt();
+
+        System.out.println("Enter number of columns for grid:");
+        int cols = scanner.nextInt();
+
+        // Encrypt using Route Cipher in Spiral Order
+        String encryptedMessage = encryptRouteCipher(message, rows, cols);
+
+        // Apply X+1 Cipher
+        String finalEncryptedMessage = applyXPlusOneCipher(encryptedMessage);
+
+        System.out.println("Encrypted Message: " + finalEncryptedMessage);
+    }
+}

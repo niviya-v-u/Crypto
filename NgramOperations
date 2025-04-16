@@ -1,0 +1,57 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class NgramOperations {
+
+    public static List<String> generateNgrams(String text, int n) {
+        List<String> ngrams = new ArrayList<>();
+        String[] words = text.split("\\s+");
+        for (int i = 0; i <= words.length - n; i++) {
+            StringBuilder ngram = new StringBuilder();
+            for (int j = 0; j < n; j++) {
+                ngram.append(words[i + j]).append(" ");
+            }
+            ngrams.add(ngram.toString().trim());
+        }
+        return ngrams;
+    }
+
+    public static List<String> generateCharacterNgrams(String text, int n) {
+        List<String> ngrams = new ArrayList<>();
+        text = text.replaceAll("\\s+", "");
+        char[] chars = text.toCharArray();
+        for (int i = 0; i <= chars.length - n; i++) {
+            StringBuilder ngram = new StringBuilder();
+            for (int j = 0; j < n; j++) {
+                ngram.append(chars[i + j]);
+            }
+            ngrams.add(ngram.toString());
+        }
+        return ngrams;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter the text: ");
+        String text = scanner.nextLine();
+
+        System.out.print("Enter the value of n for the n-grams: ");
+        int n = scanner.nextInt();
+
+        List<String> wordNgrams = generateNgrams(text, n);
+        System.out.println("\nWord-based " + n + "-grams:");
+        for (String ngram : wordNgrams) {
+            System.out.println(ngram);
+        }
+
+        List<String> charNgrams = generateCharacterNgrams(text, n);
+        System.out.println("\nCharacter-based " + n + "-grams:");
+        for (String ngram : charNgrams) {
+            System.out.println(ngram);
+        }
+
+        scanner.close();
+    }
+}

@@ -1,0 +1,38 @@
+import java.util.Scanner;
+
+public class AtbashCipher {
+
+    public static String encryptDecrypt(String text) {
+        StringBuilder result = new StringBuilder();
+
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+
+            if (Character.isLetter(character)) {
+                char base = Character.isUpperCase(character) ? 'A' : 'a';
+                result.append((char) (base + (25 - (character - base))));
+            } else {
+                result.append(character); 
+            }
+        }
+
+        return result.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Enter text to encrypt using Atbash Cipher:");
+        String plaintext = scanner.nextLine();
+
+        // Encrypting
+        String encryptedText = encryptDecrypt(plaintext);
+        System.out.println("Encrypted Text: " + encryptedText);
+
+        // Decrypting (same method is used)
+        String decryptedText = encryptDecrypt(encryptedText);
+        System.out.println("Decrypted Text: " + decryptedText);
+
+        scanner.close();
+    }
+}

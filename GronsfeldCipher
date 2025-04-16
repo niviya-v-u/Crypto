@@ -1,0 +1,81 @@
+import java.util.Scanner;
+
+public class GronsfeldCipher {
+
+    public static String encrypt(String plaintext, String key) {
+        StringBuilder encryptedText = new StringBuilder();
+        int keyLength = key.length();
+        
+        for (int i = 0, j = 0; i < plaintext.length(); i++) {
+            char plainChar = plaintext.charAt(i);
+            
+            if (Character.isLetter(plainChar)) {
+                char keyChar = key.charAt(j % keyLength);
+                int shift = keyChar - '0';  // Convert digit from char to integer
+                
+                if (Character.isUpperCase(plainChar)) {
+                    encryptedText.append((char) ((plainChar - 'A' + shift) % 26 + 'A'));
+                } else {
+                    encryptedText.append((char) ((plainChar - 'a' + shift) % 26 + 'a'));
+                }
+                
+                j++;
+            } else {
+                encryptedText.append(plainChar); 
+            }
+        }
+        return encryptedText.toString();
+    }
+
+    // Function to decrypt the ciphertext using the Gronsfeld cipher
+    public static String decrypt(String ciphertext, String key) {
+        StringBuilder decryptedText = new StringBuilder();
+        int keyLength = key.length();
+        
+        // Loop through each character in the ciphertext
+        for (int i = 0, j = 0; i < ciphertext.length(); i++) {
+            char cipherChar = ciphertext.charAt(i);
+            
+            // Only decrypt alphabetic characters
+            if (Character.isLetter(cipherChar)) {
+                char keyChar = key.charAt(j % keyLength);
+                int shift = keyChar - '0';  // Convert digit from char to integer
+                
+                // Decrypt the character by shifting in reverse
+                if (Character.isUpperCase(cipherChar)) {
+                    decryptedText.append((char) ((cipherChar - 'A' - shift + 26) % 26 + 'A'));
+                } else {
+                    decryptedText.append((char) ((cipherChar - 'a' - shift + 26) % 26 + 'a'));
+                }
+                
+                // Move to the next character in the key
+                j++;
+            } else {
+                decryptedText.append(cipherChar); // Non-alphabet characters remain unchanged
+            }
+        }
+        return decryptedText.toString();
+    }
+
+    // Main method for testing the Gronsfeld cipher with user input
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        // Get user input for plaintext and key
+        System.out.print("Enter the plaintext: ");
+        String plaintext = scanner.nextLine();
+        
+        System.out.print("Enter the key (numeric): ");
+        String key = scanner.nextLine();
+        
+        // Encrypt the message
+        String encryptedText = encrypt(plaintext, key);
+        System.out.println("Encrypted Text: " + encryptedText);
+        
+        // Decrypt the message
+        String decryptedText = decrypt(encryptedText, key);
+        System.out.println("Decrypted Text: " + decryptedText);
+        
+        scanner.close();
+    }
+}

@@ -1,0 +1,62 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public class MyszkowskiCipherCorrected {
+
+    public static String encrypt(String plaintext, String key) {
+        key = key.toUpperCase();
+        int keyLength = key.length();
+        plaintext = plaintext.toUpperCase().replaceAll("\\s+", "");
+        int plaintextLength = plaintext.length();
+        int rows = (int) Math.ceil((double) plaintextLength / keyLength);
+        char[][] grid = new char[rows][keyLength];
+
+        int k = 0;
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < keyLength; j++) {
+                if (k < plaintextLength) {
+                    grid[i][j] = plaintext.charAt(k);
+                    k++;
+                } else {
+                    grid[i][j] = '\0'; // Fill remaining with null character
+                }
+            }
+        }
+
+        Map<Character, List<Integer>> keyIndices = new HashMap<>();
+        for (int i = 0; i < keyLength; i++) {
+            char c = key.charAt(i);
+            keyIndices.computeIfAbsent(c, l -> new ArrayList<>()).add(i);
+        }
+
+        List<Character> sortedKeyChars = keyIndices.keySet().stream().sorted().collect(Collectors.toList());
+        StringBuilder ciphertext = new StringBuilder();
+
+        for (char sortedChar : sortedKeyChars) {
+            List<Integer> originalIndices = keyIndices.get(sortedChar);
+            originalIndices.sort(Integer::compare); // Maintain original order of appearance
+
+            for (int colIndex : originalIndices) {
+                for (int i = 0; i < rows; i++) {
+                    if (grid[i][colIndex] != '\0') {
+                        ciphertext.append(grid[i][colIndex]);
+                    }
+                }
+            }
+        }
+
+        return ciphertext.toString();
+    }
+
+    public static void main(String[] args) {
+        String plaintext = "THE TROUBLE WITH DOING SOMETHING RIGHT THE FIRST TIME IS THAT NOBODY APPRECIATES HOW DIFFICULT IT WAS";
+        String key = "MAMMAL";
+        String ciphertext = encrypt(plaintext, key);
+        System.out.println("Plaintext: " + plaintext);
+        System.out.println("Key: " + key);
+        System.out.println("Ciphertext: " + ciphertext);
+    }
+}

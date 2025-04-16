@@ -4,6 +4,9 @@ public class CaesarCipher {
     public static String encrypt(String text, int shift) {
         StringBuilder result = new StringBuilder();
 
+        // Adjust the shift to always be positive and within 0-25
+        shift = (shift % 26 + 26) % 26;
+
         for (int i = 0; i < text.length(); i++) {
             char character = text.charAt(i);
 
@@ -19,23 +22,35 @@ public class CaesarCipher {
     }
 
     public static String decrypt(String text, int shift) {
-        return encrypt(text, 26 - (shift % 26)); // Reverse the shift
+        // Adjust the shift to reverse the encryption
+        shift = (shift % 26 + 26) % 26;
+        return encrypt(text, 26 - shift);
     }
 
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        int defaultShift = 3;
+
         System.out.println("Enter the text to be encrypted:");
         String plaintext = scanner.nextLine();
 
-        System.out.println("Enter the shift number:");
-        int shift = scanner.nextInt();
+        // Encrypt and decrypt with the default shift
+        String encryptedText = encrypt(plaintext, defaultShift);
+        System.out.println("Encrypted Text with default shift (3): " + encryptedText);
 
-        String encryptedText = encrypt(plaintext, shift);
-        System.out.println("Encrypted Text: " + encryptedText);
+        String decryptedText = decrypt(encryptedText, defaultShift);
+        System.out.println("Decrypted Text with default shift (3): " + decryptedText);
 
-        String decryptedText = decrypt(encryptedText, shift);
-        System.out.println("Decrypted Text: " + decryptedText);
+        // Encrypt and decrypt with a custom shift
+        System.out.println("\nEnter a custom shift number:");
+        int customShift = scanner.nextInt();
+
+        String customEncryptedText = encrypt(plaintext, customShift);
+        System.out.println("Encrypted Text with custom shift (" + customShift + "): " + customEncryptedText);
+
+        String customDecryptedText = decrypt(customEncryptedText, customShift);
+        System.out.println("Decrypted Text with custom shift (" + customShift + "): " + customDecryptedText);
 
         scanner.close();
     }

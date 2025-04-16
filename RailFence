@@ -1,0 +1,148 @@
+import java.util.Arrays;
+import java.util.Scanner;
+
+public class CustomRailFence {
+
+    // Encrypt a message
+    public static String encryptMessage(String plaintext, int rails) {
+        // Remove spaces from the plaintext for encryption but keep track of their positions
+        StringBuilder filteredPlaintext = new StringBuilder();
+        int[] spacePositions = new int[plaintext.length()];
+        int spaceCount = 0;
+
+        for (int i = 0; i < plaintext.length(); i++) {
+            if (plaintext.charAt(i) == ' ') {
+                spacePositions[spaceCount++] = i;
+            } else {
+                filteredPlaintext.append(plaintext.charAt(i));
+            }
+        }
+
+        // Create the matrix for the Rail Fence cipher
+        char[][] railMatrix = new char[rails][filteredPlaintext.length()];
+
+        // Filling the rail matrix with newline characters
+        for (int i = 0; i < rails; i++)
+            Arrays.fill(railMatrix[i], '\n');
+
+        boolean dirDown = false;
+        int row = 0, col = 0;
+
+        for (int i = 0; i < filteredPlaintext.length(); i++) {
+            // Check the direction of flow
+            if (row == 0 || row == rails - 1)
+                dirDown = !dirDown;
+
+            // Fill the matrix with the character
+            railMatrix[row][col++] = filteredPlaintext.charAt(i);
+
+            // Move to the next row
+            if (dirDown)
+                row++;
+            else
+                row--;
+        }
+
+        // Now create the encrypted message from the matrix
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < rails; i++) {
+            for (int j = 0; j < filteredPlaintext.length(); j++) {
+                if (railMatrix[i][j] != '\n')
+                    result.append(railMatrix[i][j]);
+            }
+        }
+
+        // Insert spaces back into their original positions in the encrypted message
+        StringBuilder finalResult = new StringBuilder(result.toString());
+        for (int i = 0; i < spaceCount; i++) {
+            finalResult.insert(spacePositions[i], ' ');
+        }
+
+        return finalResult.toString();
+    }
+
+    // Decrypt the ciphertext
+    public static String decryptMessage(String cipher, int rails) {
+        // Create the matrix for the Rail Fence cipher
+        char[][] railMatrix = new char[rails][cipher.length()];
+
+        // Filling the rail matrix with newline characters
+        for (int i = 0; i < rails; i++)
+            Arrays.fill(railMatrix[i], '\n');
+
+        boolean dirDown = true;
+        int row = 0, col = 0;
+
+        // Mark the places with '*' for the cipher text positions
+        for (int i = 0; i < cipher.length(); i++) {
+            if (row == 0)
+                dirDown = true;
+            if (row == rails - 1)
+                dirDown = false;
+
+            // Place the marker at the correct position
+            railMatrix[row][col++] = '*';
+
+            // Move to the next row
+            if (dirDown)
+                row++;
+            else
+                row--;
+        }
+
+        // Fill the rail matrix with characters from the cipher
+        int index = 0;
+        for (int i = 0; i < rails; i++) {
+            for (int j = 0; j < cipher.length(); j++) {
+                if (railMatrix[i][j] == '*' && index < cipher.length()) {
+                    railMatrix[i][j] = cipher.charAt(index++);
+                }
+            }
+        }
+
+        // Now retrieve the decrypted message
+        StringBuilder result = new StringBuilder();
+        row = 0;
+        col = 0;
+        for (int i = 0; i < cipher.length(); i++) {
+            if (row == 0)
+                dirDown = true;
+            if (row == rails - 1)
+                dirDown = false;
+
+            // Retrieve the character
+            if (railMatrix[row][col] != '*')
+                result.append(railMatrix[row][col++]);
+
+            // Move to the next row
+            if (dirDown)
+                row++;
+            else
+                row--;
+        }
+
+        return result.toString();
+    }
+
+    // Driver function
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        // Take input for plaintext and rails
+        System.out.print("Enter the plaintext: ");
+        String plaintext = scanner.nextLine();
+        System.out.print("Enter the number of rails: ");
+        int rails = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+
+        // Encrypt the message
+        String encryptedMessage = encryptMessage(plaintext, rails);
+        System.out.println("Encrypted Message: " + encryptedMessage);
+
+        // Decrypt the message
+        String decryptedMessage = decryptMessage(encryptedMessage, rails);
+        System.out.println("Decrypted Message: " + decryptedMessage);
+
+        scanner.close();
+    }
+}

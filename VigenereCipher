@@ -1,0 +1,74 @@
+import java.util.Scanner;
+
+public class VigenereCipher {
+
+    public static String encrypt(String plaintext, String keyword) {
+        StringBuilder encryptedText = new StringBuilder();
+        int keywordLength = keyword.length();
+        
+        for (int i = 0, j = 0; i < plaintext.length(); i++) {
+            char plainChar = plaintext.charAt(i);
+            
+            if (Character.isLetter(plainChar)) {
+                char keyChar = keyword.charAt(j % keywordLength);
+                
+                int shift = Character.toUpperCase(keyChar) - 'A';
+                
+                if (Character.isUpperCase(plainChar)) {
+                    encryptedText.append((char) ((plainChar - 'A' + shift) % 26 + 'A'));
+                } else {
+                    encryptedText.append((char) ((plainChar - 'a' + shift) % 26 + 'a'));
+                }
+                
+                j++;
+            } else {
+                encryptedText.append(plainChar); 
+            }
+        }
+        return encryptedText.toString();
+    }
+
+    public static String decrypt(String ciphertext, String keyword) {
+        StringBuilder decryptedText = new StringBuilder();
+        int keywordLength = keyword.length();
+        
+        for (int i = 0, j = 0; i < ciphertext.length(); i++) {
+            char cipherChar = ciphertext.charAt(i);
+            
+            if (Character.isLetter(cipherChar)) {
+                char keyChar = keyword.charAt(j % keywordLength);
+                
+                int shift = Character.toUpperCase(keyChar) - 'A';
+                
+                if (Character.isUpperCase(cipherChar)) {
+                    decryptedText.append((char) ((cipherChar - 'A' - shift + 26) % 26 + 'A'));
+                } else {
+                    decryptedText.append((char) ((cipherChar - 'a' - shift + 26) % 26 + 'a'));
+                }
+                
+                j++;
+            } else {
+                decryptedText.append(cipherChar); 
+            }
+        }
+        return decryptedText.toString();
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        
+        System.out.print("Enter the plaintext: ");
+        String plaintext = scanner.nextLine();
+        
+        System.out.print("Enter the keyword: ");
+        String keyword = scanner.nextLine();
+        
+        String encryptedText = encrypt(plaintext, keyword);
+        System.out.println("Encrypted Text: " + encryptedText);
+        
+        String decryptedText = decrypt(encryptedText, keyword);
+        System.out.println("Decrypted Text: " + decryptedText);
+        
+        scanner.close();
+    }
+}
